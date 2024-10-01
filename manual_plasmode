@@ -1,0 +1,146 @@
+## **PlasmodeBin2()**
+
+### **Purpose**
+The `PlasmodeBin2()` function generates simulated binary outcome data based on specified logistic models for both the outcome and treatment (exposure). It uses specified effect sizes to simulate multiple datasets, adjusting event and exposure rates as needed. This function is primarily intended for simulating epidemiological data, providing control over exposure prevalence and outcome event rates across multiple simulations.
+
+### **Usage**
+```r
+PlasmodeBin2(
+  formulaOut = NULL,
+  objectOut = NULL,
+  formulaExp = NULL,
+  objectExp = NULL,
+  data,
+  idVar,
+  effectOR = 1,
+  MMOut = 1,
+  MMExp = 1,
+  nsim,
+  size,
+  eventRate = NULL,
+  exposedPrev = NULL
+)
+```
+
+### **Arguments**
+
+- **`formulaOut`**:
+  **Type**: `formula`
+  The formula for the outcome model. It should be specified in the form `Outcome ~ Exposure + Confounders`.
+
+- **`objectOut`**:
+  **Type**: `glm` object
+  A fitted model for the outcome. If `NULL`, the model will be estimated from the `formulaOut` argument.
+
+- **`formulaExp`**:
+  **Type**: `formula`
+  The formula for the exposure (treatment) model. It should be specified in the form `Exposure ~ Confounders`.
+
+- **`objectExp`**:
+  **Type**: `glm` object
+  A fitted model for the exposure. If `NULL`, the model will be estimated from the `formulaExp` argument.
+
+- **`data`**:
+  **Type**: `data.frame`
+  The original dataset used for simulating data.
+
+- **`idVar`**:
+  **Type**: `character`
+  The name of the column in the dataset representing the unique identifier for individuals (IDs).
+
+- **`effectOR`**:
+  **Type**: `numeric`
+  User-specified effect size for the exposure-outcome relationship (odds ratio). Default is `1` (no effect).
+
+- **`MMOut`**:
+  **Type**: `numeric`
+  Multiplier for confounder effects on the outcome applied to the estimated log odds ratios (ORs) in the outcome model. Default is `1`.
+
+- **`MMExp`**:
+  **Type**: `numeric`
+  Multiplier for confounder effects on the exposure applied to the estimated log ORs in the exposure model. Default is `1`.
+
+- **`nsim`**:
+  **Type**: `integer`
+  Number of simulation datasets to generate.
+
+- **`size`**:
+  **Type**: `integer`
+  Size of the simulated datasets.
+
+- **`eventRate`**:
+  **Type**: `numeric`, optional
+  Desired average event rate (for the outcome). If `NULL`, the event rate in the original data is used.
+
+- **`exposedPrev`**:
+  **Type**: `numeric`, optional
+  Desired average exposure prevalence. If `NULL`, the exposure prevalence in the original data is used.
+
+### **Details**
+
+The `PlasmodeBin2()` function is designed to simulate binary outcome data, creating a specified number of simulations based on the provided exposure and outcome models. The function allows flexibility in:
+- Adjusting confounder effects on both the outcome and exposure.
+- Simulating different sizes of datasets.
+- Controlling the average event rate and exposure prevalence in the simulated datasets.
+
+Four key configurations can be used depending on whether the outcome/exposure models are provided via a formula or pre-fitted objects:
+1. **Both outcome and exposure models are provided using formulas**: If both `formulaOut` and `formulaExp` are provided, the function estimates logistic regression models for both outcome and exposure.
+2. **Only the outcome model is provided using a formula**: The function estimates a logistic model for the outcome and assumes the exposure model is already well-established.
+3. **Only the exposure model is provided using a formula**: The function estimates a logistic model for the exposure while assuming the outcome model is already defined.
+4. **Both outcome and exposure models are provided using pre-fitted objects**: The function uses pre-specified models (`objectOut` and `objectExp`) for outcome and exposure.
+
+### **Return Value**
+
+The function returns a list containing:
+- **TrueOutBeta**: Coefficients of the simulated outcome model.
+- **TrueExpBeta**: Coefficients of the simulated exposure model.
+- **RR**: Relative risk (average over all simulations).
+- **RD**: Risk difference (average over all simulations).
+- **Sim_Data**: A data frame containing the simulated datasets, including the individual IDs, simulated exposure (`EXPOSURE1`, `EXPOSURE2`, ..., `EXPOSUREn`), and simulated outcome (`EVENT1`, `EVENT2`, ..., `EVENTn`).
+
+### **Examples**
+
+```r
+# Example of using PlasmodeBin2 to generate binary outcome data
+
+# Define a formula for the outcome
+formulaOut <- Outcome ~ Exposure + Age + Gender
+
+# Define a formula for the exposure (treatment)
+formulaExp <- Exposure ~ Age + Gender + Comorbidity
+
+# Use the PlasmodeBin2 function to generate 100 simulation datasets
+result <- PlasmodeBin2(
+  formulaOut = formulaOut,
+  formulaExp = formulaExp,
+  data = my_data,
+  idVar = "ID",
+  effectOR = 2,
+  MMOut = 1.5,
+  MMExp = 1.2,
+  nsim = 100,
+  size = 1000,
+  eventRate = 0.05,
+  exposedPrev = 0.3
+)
+
+# Access the simulated data
+simulated_data <- result$Sim_Data
+```
+
+This will:
+1. Simulate 100 datasets with 1000 individuals each, based on the specified outcome and exposure models.
+2. Adjust the odds ratio for the exposure effect on the outcome to `2` and apply the multipliers for confounders.
+3. Set the desired event rate to `5%` and the exposure prevalence to `30%`.
+
+### **Dependencies**
+
+Ensure the following R packages are installed and loaded:
+```r
+install.packages(c("splitstackshape", "glm2", "dplyr"))
+```
+
+### **Notes**
+- If `formulaOut` or `formulaExp` are missing, a pre-fitted model object (`objectOut`, `objectExp`) must be provided.
+- When generating simulated datasets, the exposure and outcome probabilities are adjusted to match the desired event and exposure rates.
+- This function supports both controlled exposure prevalence and event rates, making it useful for simulation studies in epidemiology.

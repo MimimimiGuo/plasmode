@@ -1,0 +1,41 @@
+
+### data structure
+
+#### **Description of Data Source**
+
+The data used in the simulation functions is derived from a non-public OMOP Common Data Model (CDM) dataset, related to epidemiological research. Access to this dataset requires specific permissions, but the provided code can be used with other data sources if the correct parameters are specified. These simulations use covariates, exposure (treatment), and outcome variables to estimate binary outcomes and calculate disease risk scores (DRS) and propensity scores (PS).
+
+Users can run these analyses on their datasets by specifying the appropriate variables in the code comments and manuals (i.e., `manual_ps.txt`, `manual_drs.txt`, `manual_plasmode.txt`).
+
+#### **Data Structure**
+
+1. **`ID`**:
+   - A unique identifier for each individual in the dataset.
+   - **Type**: Integer.
+
+2. **Confounders (`Confounder1`, `Confounder2`, ..., `ConfounderN`)**:
+   - These are variables such as age, sex, and comorbidities that affect both the treatment and the outcome.
+   - **Type**: Numeric or categorical.
+
+3. **Covariates (`Covariate1`, `Covariate2`, ..., `CovariateN`)**:
+   - Additional characteristics or features that influence either the treatment or outcome.
+   - **Type**: Numeric or categorical.
+
+4. **`EXPOSURE1`, `EXPOSURE2`, ..., `EXPOSUREn`**:
+   - Binary treatment/exposure variables indicating whether an individual received a treatment (e.g., a drug) during each simulation.
+   - **Type**: Binary (0/1).
+
+5. **`EVENT1`, `EVENT2`, ..., `EVENTn`**:
+   - Binary outcome variables indicating whether an individual experienced a health event (e.g., fracture) during each simulation.
+   - **Type**: Binary (0/1).
+
+#### **Special Access Information**
+
+- **Data Access**: This dataset is restricted and requires permission to access. Users may need institutional approval or permissions from data custodians to access similar datasets. However, the provided code can be adapted to work with user-supplied datasets following the provided structure.
+
+- **Usage**: Users should modify the script by correctly specifying the relevant confounders, covariates, treatment, and outcome variables. These variables must be present in the user’s dataset and follow the structure outlined here.
+
+- **Customization**: The user can specify the confounders, risk factors, and treatment variables using the provided `confColumns`, `instrColumns`, `rfColumns`, `exp_cols`, and `out_cols`. The comments in the scripts and the `manual_plasmode.txt` provide further guidance for this customization.
+
+- **Contact for Support**:
+  For further assistance in adapting the provided code, you can contact `yuchen.guo@ndorms.ox.ac.uk` or open an issue in the GitHub repository linked to the project.

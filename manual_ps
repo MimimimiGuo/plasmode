@@ -1,0 +1,115 @@
+
+
+## **run_ps()**
+
+### **Purpose**
+The `run_ps()` function is designed to run a simulation-based propensity score analysis using logistic regression, Multi-Layer Perceptron (MLP), and XGBoost models. It calculates propensity scores for different models, using randomized search for hyperparameter tuning, and saves the results into a specified CSV file. The function is flexible, allowing the user to pass file paths for confounder and covariate lists, and simulation data.
+
+### **Usage**
+```python
+run_ps(i, conf_list, cov_list, data_template, output_file, random_seed=43)
+```
+
+### **Arguments**
+
+- **`i`**:
+  **Type**: `int`
+  The index for the current simulation. Used to load the appropriate dataset and specify the treatment and outcome column names (e.g., "EXPOSURE{i}", "EVENT{i}").
+
+- **`conf_list`**:
+  **Type**: `pd.DataFrame`
+  DataFrame containing a list of confounder variable names. These are used to filter the relevant columns from the dataset.
+
+- **`cov_list`**:
+  **Type**: `pd.DataFrame`
+  DataFrame containing a list of covariate variable names. These are used to filter the relevant columns from the dataset.
+
+- **`data_template`**:
+  **Type**: `str`
+  A path template for loading the simulation data. The function uses this template to load the correct CSV file for each simulation, inserting the value of `i` into the template.
+  **Example**: `"D:/plasmode/data_{}.csv"`
+
+- **`output_file`**:
+  **Type**: `str`
+  A path template for saving the resulting DataFrame with propensity scores. The function saves the results into this file, replacing `{}` with the current simulation index `i`.
+  **Example**: `"D:/plasmode/output_m{}.csv"`
+
+- **`random_seed`**:
+  **Type**: `int`, optional, default: `43`
+  A random seed used for splitting the data into training and testing sets, ensuring reproducibility.
+
+### **Details**
+
+1. **Data Splitting**:
+   The function first splits the covariate data into training (50%) and testing (50%) sets, stratified by the treatment variable.
+
+2. **Logistic Regression Models**:
+   - A **Logistic Regression** model is first fitted using the confounders.
+   - A **LASSO Logistic Regression** model is fitted using the covariates with a randomized search over hyperparameters (`C` and `solver`).
+
+3. **Multi-Layer Perceptron (MLP)**:
+   - An MLP model is built using Keras and wrapped with scikit-learn's `KerasClassifier`.
+   - Randomized search is used to tune hyperparameters such as `batch_size`, `epochs`, `optimizer`, `kernel`, `units`, `hidden_layers`, and `activation`.
+
+4. **XGBoost**:
+   - An **XGBoost** classifier is used, and hyperparameters like `n_estimators`, `min_child_weight`, `gamma`, `subsample`, `learning_rate`, and `max_depth` are tuned using randomized search.
+
+5. **Propensity Scores**:
+   - The function computes propensity scores from the Logistic Regression, LASSO, MLP, and XGBoost models and stores them in the DataFrame.
+
+6. **Output**:
+   - The resulting DataFrame, containing the covariates along with the predicted propensity scores and treatment/outcome columns, is saved to the specified output file.
+
+### **Value**
+
+The function writes a CSV file containing:
+- Covariates used in the model.
+- Propensity scores (`ps_log`, `ps_lasso`, `ps_xgb`, `ps_nn`) predicted by the logistic, LASSO, XGBoost, and neural network models.
+- The treatment (`treatment`) and outcome (`Y`) columns for each simulation.
+
+### **Examples**
+
+```python
+# Load confounder and covariate lists
+conf_list = pd.read_csv("conf_list.csv", index_col=0)
+cov_list = pd.read_csv("cov_list.csv", index_col=0)
+
+# Run the simulation for a given index
+run_ps(
+    i=1,
+    conf_list=conf_list,
+    cov_list=cov_list,
+    data_template="D:/plasmode/data_{}.csv",
+    output_file="D:/plasmode/output_m{}.csv"
+)
+```
+
+This function will:
+1. Load the dataset for simulation index `1` from `"D:/plasmode/data_1.csv"`.
+2. Run logistic regression, MLP, and XGBoost models.
+3. Compute propensity scores.
+4. Save the output to `"D:/plasmode/output_m1.csv"`.
+
+### **Dependencies**
+
+Make sure the following packages are installed:
+- `numpy`
+- `pandas`
+- `scikit-learn`
+- `keras`
+- `xgboost`
+- `copy` (standard library)
+
+You can install the required Python libraries using:
+```bash
+pip install numpy pandas scikit-learn keras xgboost
+```
+
+### **Notes**
+- Ensure that the `data_template` and `output_file` paths are correctly formatted, and `{}` should be used as a placeholder for the simulation index `i`.
+- The function is flexible and allows for hyperparameter tuning in LASSO, MLP, and XGBoost models through randomized search.
+
+---
+
+This comprehensive help file gives users all the information they need to understand the function and run it effectively. Let me know if you need further modifications!
+
